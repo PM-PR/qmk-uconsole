@@ -75,7 +75,11 @@ const key_override_t vol_key_override =
 const key_override_t *key_overrides[] = {&vol_key_override};
 
 const uint16_t PROGMEM bootloader_combo[] = {KC_LALT, KC_RALT, KC_LGUI, COMBO_END};
-combo_t key_combos[] = {COMBO(bootloader_combo, QK_BOOT)};
+const uint16_t PROGMEM tap_hold_combo[] = {LH_T, KC_HOME, COMBO_END};
+combo_t key_combos[] = {
+  COMBO(bootloader_combo, QK_BOOT),
+  COMBO(tap_hold_combo, KB_TAP_HOLD),
+};
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     /*
@@ -124,10 +128,10 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      * (Lck)(Prt)(Pau)     (Mut)(   )(   )(   )(F11)(F12)(   )
      * (   )(F1 )(F2 )(F3 )(F4 )(F5 )(F6 )(F7 )(F8 )(F9 )(F10)(Del)
      * (Cap)(   )(   )(   )(   )(   )(   )(PgU)(Ins)(   )(   )
-     * (   )(   )(   )(   )(THd)(Tg2)(Hom)(End)(PgD)(   )(   )(   )
+     * (   )(   )(   )(   )(   )(Tg2)(Hom)(End)(PgD)(   )(   )(   )
      * (Hom)(PgD)(   )(   )(   )(   )(   )(   )
      * (   )(   )(Cmd)(      BlStp       )(Cmd)(   )(  )
-     * THd = Tap-Hold Toggle
+     * Fn+T+H = Tap-Hold Toggle
      */
 
     [LY1] = LAYOUT(
@@ -138,7 +142,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         KC_PSCR, KC_PAUS, KC_MUTE, _______, _______, _______, KC_F11,  KC_F12,
         KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,   KC_F6,   KC_F7,   KC_F8,
         KC_F9,   KC_F10,  KB_LOCK, KC_CAPS, _______, _______, _______, _______,
-        _______, _______, _______, _______, KB_TAP_HOLD, _______, KC_PGUP, KC_INS,
+        _______, _______, _______, _______, _______, _______, KC_PGUP, KC_INS,
         _______, _______, _______, _______, _______, _______, TG(LY2), KC_HOME,
         KC_END,  KC_PGDN, _______, _______, _______, _______, _______, _______,
         _______, _______, KC_BRID, KC_BRIU, _______, _______, _______, _______,

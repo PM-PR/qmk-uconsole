@@ -47,7 +47,7 @@ Perfect for verifying your firmware installation and familiarizing yourself with
       - **Numbers:** 0-9 (tap = number, hold = shifted symbol like `!`, `@`, `#`, etc.)
       - **Special Characters:** `` ` `` ↔ `~`, `[` ↔ `{`, `]` ↔ `}`, `-` ↔ `_`, `=` ↔ `+`, `/` ↔ `?`, `\` ↔ `|`, `;` ↔ `:`, `'` ↔ `"`, `,` ↔ `<`, `.` ↔ `>`
     * **Quick Duplication:** Double-tap quickly to produce two lowercase characters (e.g., tapping `A` twice = `aa`)
-    * **Toggle On/Off:** Press **Fn+T** to toggle tap-hold functionality on or off (default: **disabled**)
+    * **Toggle On/Off:** Press **Fn+T+H** to toggle tap-hold functionality on or off (default: **disabled**)
       - The setting persists across power cycles via EEPROM storage
       - When disabled: keys behave normally (single key press/release)
       - When enabled: timing-based tap-hold behavior applies
