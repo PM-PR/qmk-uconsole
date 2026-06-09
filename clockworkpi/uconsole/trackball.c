@@ -43,15 +43,13 @@ static uint16_t last_axis_activity[AXIS_NUM] = {0};
 // Natural Acceleration Curve: High precision at low speeds, power curve at high speeds
 static float rateToVelocityCurve(float input, float acceleration_scale) {
     float abs_input = fabsf(input);
-    if (abs_input < 0.02f) return 0; // Lower deadzone for finer control
+    if (abs_input < 0.05f) return 0; // Lower deadzone for finer control
 
-    float x = abs_input - 0.02f;
-    // Double only the high-speed acceleration; keep the linear term unchanged
-    // so slow movements retain their existing precision.
-    float accel = (powf(x, 1.5f) / 20.0f) * acceleration_scale;
-    float linear = x / 20.0f;
+    float x = abs_input - 0.05f;
+    float accel = ((x * x) / 60.0f) * acceleration_scale;
+    float linear = x / 50.0f;
 
-    return 0.1f + linear + accel; 
+    return 0.12f + linear + accel; 
 }
 
 static void trackball_move(uint8_t axis, int8_t direction) {
@@ -129,10 +127,10 @@ static void trackball_move(uint8_t axis, int8_t direction) {
     const float rate = sqrtf(rx * rx + ry * ry);
     const float dominant_rate = fmaxf(rx, ry);
     const float diagonal_balance = (dominant_rate > 0) ? (fminf(rx, ry) / dominant_rate) : 0;
-    // Compensate for velocity being split across two axes. The nonlinear boost
-    // reaches sqrt(2) for a balanced diagonal and fades out toward either axis.
-    const float acceleration_scale = 1.0f + 0.41421356f * diagonal_balance;
-    float velocity = rateToVelocityCurve(rate, acceleration_scale);
+    // Compensate for velocity being split across two axes.
+    // Boost diagonal acceleration and reduce cardinal acceleration.
+    const float acceleration_scale = 1.0f + 1.2f * diagonal_balance;
+    float velocity = rateToVelocityCurve(rate / 4.0f, acceleration_scale);
 
     // Apply precision scaling if enabled
     if (precision_mode) {
@@ -144,12 +142,20 @@ static void trackball_move(uint8_t axis, int8_t direction) {
     const float vx = rx * ratio;
     const float vy = ry * ratio;
 
+    uint16_t sustain_x = rate_meter_delta(&rate_meters[AXIS_X]);
+    if (sustain_x < 5) sustain_x = 5;
+    if (sustain_x > 20) sustain_x = 20;
+
+    uint16_t sustain_y = rate_meter_delta(&rate_meters[AXIS_Y]);
+    if (sustain_y < 5) sustain_y = 5;
+    if (sustain_y > 20) sustain_y = 20;
+
     if (axis == AXIS_X) {
-      glider_update(&gliders[AXIS_X], vx, sqrtf(rate_meter_delta(&rate_meters[AXIS_X])));
+      glider_update(&gliders[AXIS_X], vx, sustain_x);
       glider_update_speed(&gliders[AXIS_Y], vy);
     } else {
       glider_update_speed(&gliders[AXIS_X], vx);
-      glider_update(&gliders[AXIS_Y], vy, sqrtf(rate_meter_delta(&rate_meters[AXIS_Y])));
+      glider_update(&gliders[AXIS_Y], vy, sustain_y);
     }
   }
 }
@@ -200,6 +206,25 @@ report_mouse_t pointing_device_driver_get_report(report_mouse_t mouse_report) {
   } else {
     rate_meter_tick(&rate_meters[AXIS_X], delta);
     rate_meter_tick(&rate_meters[AXIS_Y], delta);
+
+    // Active decay/cutoff logic for gliders when expected interrupts are overdue.
+    uint16_t time_since_X = TIMER_DIFF_16(now, rate_meters[AXIS_X].last_time_millis);
+    uint16_t time_since_Y = TIMER_DIFF_16(now, rate_meters[AXIS_Y].last_time_millis);
+    uint16_t time_since_any = (time_since_X < time_since_Y) ? time_since_X : time_since_Y;
+
+    for (int i = 0; i < AXIS_NUM; i++) {
+      if (gliders[i].speed != 0) {
+        uint16_t limit = rate_meters[i].average_delta;
+        uint16_t buffer = (limit < 20) ? 5 : (limit / 4);
+        if (time_since_any > limit + buffer) {
+          gliders[i].sustain = 0;
+          gliders[i].speed *= 0.7f;
+          if (time_since_any > (limit + buffer) * 3 / 2) {
+            glider_stop(&gliders[i]);
+          }
+        }
+      }
+    }
   }
   last_mode = mode;
 
