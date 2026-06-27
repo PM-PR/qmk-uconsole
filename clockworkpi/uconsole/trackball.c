@@ -143,7 +143,7 @@ static void trackball_move(uint8_t axis, int8_t direction) {
     // Boost diagonal acceleration and reduce cardinal acceleration.
     const float acceleration_scale = 1.0f + 1.2f * diagonal_balance;
     float velocity =
-        rateToVelocityCurve(rate / 4.0f, acceleration_scale) * 0.65f;
+        rateToVelocityCurve(rate / 2.0f, acceleration_scale) * 1.00f;
 
     // Apply precision scaling if enabled
     if (precision_mode) {
