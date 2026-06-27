@@ -47,10 +47,10 @@ static uint16_t last_axis_activity[AXIS_NUM] = {0};
 // speeds
 static float rateToVelocityCurve(float input, float acceleration_scale) {
   float abs_input = fabsf(input);
-  if (abs_input < 0.05f)
+  if (abs_input < 0.01f)
     return 0; // Lower deadzone for finer control
 
-  float x = abs_input - 0.05f;
+  float x = abs_input - 0.01f;
   float accel = ((x * x) / 60.0f) * acceleration_scale;
   float linear = x / 50.0f;
 
