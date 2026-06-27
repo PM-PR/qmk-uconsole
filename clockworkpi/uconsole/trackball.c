@@ -18,7 +18,7 @@ enum { MODE_WHEEL, MODE_MOUSE };
 
 static uint8_t last_mode = MODE_MOUSE;
 static uint16_t last_report = 0;
-volatile bool select_button_pressed = false; // toggled from keymap
+volatile bool select_button_pressed = false; // toggled from keymap.
 volatile bool select_button_scrolled =
     false; // set when trackball moves while select is pressed
 volatile bool precision_mode = false; // toggled from keymap
